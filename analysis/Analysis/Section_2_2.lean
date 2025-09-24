@@ -358,60 +358,37 @@ theorem Nat.add_le_add_left (a b c:Nat) : a ≤ b ↔ c + a ≤ c + b := add_ge_
 
 /-- (e) a < b iff a++ ≤ b.  Compare with Mathlib's `Nat.succ_le_iff`. -/
 theorem Nat.lt_iff_succ_le (a b:Nat) : a < b ↔ a++ ≤ b := by
-  rw [Nat.lt_iff, Nat.le_iff]
+sorry
+
+-- /-- (f) a < b if and only if b = a + d for positive d. -/
+theorem Nat.lt_iff_add_pos (a b:Nat) : a < b ↔ ∃ d:Nat, d.IsPos ∧ b = a + d := by
+  rw [Nat.lt_iff]
   constructor
   . intro h
-    obtain ⟨a_1, ha_1⟩ := h.1
-    -- We have b = a + a_1 and a ≠ b
-    -- Since a ≠ b, we know a_1 ≠ 0, so a_1 is positive
-    -- We need to show a++ ≤ b, i.e., ∃ c, b = a++ + c
-    -- Since b = a + a_1 and a_1 ≠ 0, we can write a_1 = c++ for some c
-    -- Then b = a + (c++) = (a + c)++ = a++ + c
-    have h_pos : a_1.IsPos := by
-      rw [isPos_iff]
-      intro h_zero
-      rw [h_zero] at ha_1
-      rw [add_zero] at ha_1
-      exact h.2 ha_1.symm
-    obtain ⟨c, hc, _⟩ := uniq_succ_eq a_1 h_pos
-    use c
-    rw [← hc] at ha_1
-    rw [add_succ] at ha_1
-    exact ha_1
+    obtain ⟨a_1, ha_1⟩ := h
+    choose d hd using a_1
+    use d
+    split_ands
+    . by_contra h
+      rw [Nat.isPos_iff] at h
+      simp at h
+      rw [h] at hd
+      rw [add_zero] at hd
+      symm at hd
+      contradiction
+    . assumption
   . intro h
-    obtain ⟨c, hc⟩ := h
-    -- We have b = a++ + c = (a + c)++
-    -- This means b = a + (c++) and a ≠ b (since b = (a + c)++ > a + c ≥ a)
+    obtain ⟨d, hd⟩ := h
+    obtain ⟨hd1, hd2⟩ := hd
     constructor
-    . use c++
-      rw [add_succ]
-      exact hc
-    . intro h_eq
-      rw [h_eq] at hc
-      -- Now we have a = a++ + c = (a + c)++
-      -- This means a = (a + c)++, which is impossible
-      -- We can show this by noting that a < (a + c)++
-      have h_lt : a < (a + c)++ := by
-        rw [Nat.lt_iff]
-        constructor
-        . use c++
-          rw [add_succ]
-        . intro h_eq2
-          -- If a = (a + c)++, then a = a + (c++), so 0 = c++
-          -- But c++ ≠ 0, contradiction
-          rw [h_eq2] at hc
-          rw [add_succ] at hc
-          -- Now hc: a = a + (c++)
-          -- This means 0 = c++, but c++ ≠ 0
-          have h_zero : 0 = c++ := by
-            rw [← add_zero a] at hc
-            exact add_left_cancel _ _ _ hc
-          exact succ_ne _ h_zero
-      -- Now we have a < (a + c)++ and a = (a + c)++, which is a contradiction
-      exact ne_of_lt _ _ h_lt hc
-/-- (f) a < b if and only if b = a + d for positive d. -/
-theorem Nat.lt_iff_add_pos (a b:Nat) : a < b ↔ ∃ d:Nat, d.IsPos ∧ b = a + d := by
-sorry
+    . use d
+    . by_contra h
+      rw [h] at hd2
+      nth_rw 1 [<-add_zero b] at hd2
+      apply add_left_cancel at hd2
+      symm at hd2
+      contradiction
+
 
 /-- If a < b then a ̸= b,-/
 theorem Nat.ne_of_lt (a b:Nat) : a < b → a ≠ b := by
