@@ -519,22 +519,50 @@ theorem Nat.trichotomous (a b:Nat) : a < b ∨ a = b ∨ a > b := by
 
   Compare with Mathlib's `Nat.decLe`.
 -/
+
+-- helper lemma
+lemma not_succ_le_self (b : Nat) : ¬b++ ≤ b := by
+  intro h
+  -- h : b++ ≤ b
+  have h_gt : b++ > b := Nat.succ_gt_self b
+  -- h_gt : b++ > b means b++ ≥ b and b++ ≠ b
+  rw [Nat.gt_iff_lt] at h_gt
+  have h_ge : b++ ≥ b := Nat.le_of_lt h_gt
+  have h_ne : b++ ≠ b := h_gt.2.symm
+  -- Now we have both b++ ≤ b and b++ ≥ b, so b++ = b by antisymmetry
+  have h_eq : b++ = b := Nat.ge_antisymm h_ge h
+  -- But b++ ≠ b, contradiction
+  exact h_ne h_eq
+
 def Nat.decLe : (a b : Nat) → Decidable (a ≤ b)
   | 0, b => by
     apply isTrue
-
+    apply zero_le
   | a++, b => by
     cases decLe a b with
     | isTrue h =>
       cases decEq a b with
       | isTrue h =>
         apply isFalse
-
+        rw [h]
+        exact not_succ_le_self b
       | isFalse h =>
         apply isTrue
-
+        refine (lt_iff_succ_le a b).mp ?_
+        constructor
+        assumption
+        assumption
     | isFalse h =>
       apply isFalse
+      intro h
+      rw [succ_eq_add_one] at h
+      choose d hd using h
+      rw [add_assoc] at hd
+      have h_le : a ≤ b := by
+        rw [Nat.le_iff]
+        use 1 + d
+
+      contradiction
 
 
 instance Nat.decidableRel : DecidableRel (· ≤ · : Nat → Nat → Prop) := Nat.decLe
