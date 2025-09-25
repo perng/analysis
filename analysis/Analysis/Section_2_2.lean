@@ -462,6 +462,35 @@ theorem Nat.zero_le (a:Nat) : 0 ≤ a := by
 /-- Proposition 2.2.13 (Trichotomy of order for natural numbers) / Exercise 2.2.4
     Compare with Mathlib's `trichotomous`.  Parts of this theorem have been placed
     in the preceding Lean theorems. -/
+
+lemma Nat.lt_add_lt (a b c:Nat) : a < b → a+c < b+c := by
+  intro h
+  rw [lt_iff_add_pos] at *
+  choose d hd using h
+  use d
+  split_ands
+  . exact hd.1
+  . rw [add_comm]
+    rw [add_comm a c ]
+    rw [add_assoc]
+    rw [hd.2]
+
+
+theorem Nat.lt_trans {a b c:Nat} (hab: a < b) (hbc: b < c) : a < c := by
+  rw [lt_iff_add_pos] at *
+  choose d hd using hab
+  choose e he using hbc
+  use d + e
+  split_ands
+  . apply add_pos_right
+    exact he.1
+
+  . obtain ⟨he2, he3⟩ := he
+    rw [hd.2] at he3
+    rw [<-add_assoc]
+    assumption
+
+
 theorem Nat.trichotomous (a b:Nat) : a < b ∨ a = b ∨ a > b := by
   -- This proof is written to follow the structure of the original text.
   revert a; apply induction
@@ -478,9 +507,8 @@ theorem Nat.trichotomous (a b:Nat) : a < b ∨ a = b ∨ a > b := by
     apply succ_gt_self
   . right;right
     have aa: a++ > a := by apply succ_gt_self
-    constructor
-    apply
-    rw?
+    rw [gt_iff_lt] at *
+    apply lt_trans case3 aa
 
   /---
   (Not from textbook) Establish the decidability of this order computably.  The portion of the
