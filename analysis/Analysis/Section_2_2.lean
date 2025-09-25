@@ -358,7 +358,41 @@ theorem Nat.add_le_add_left (a b c:Nat) : a ≤ b ↔ c + a ≤ c + b := add_ge_
 
 /-- (e) a < b iff a++ ≤ b.  Compare with Mathlib's `Nat.succ_le_iff`. -/
 theorem Nat.lt_iff_succ_le (a b:Nat) : a < b ↔ a++ ≤ b := by
-sorry
+  constructor
+  . intro h
+    rw [Nat.lt_iff] at h
+    obtain ⟨a_1, ha_1⟩ := h
+    choose d hd using a_1
+    induction d with
+    | zero =>
+      have h_zero_eq : zero = 0 := rfl
+      rw [h_zero_eq] at hd
+      rw [add_zero] at hd
+      symm at hd
+      contradiction
+    | succ d ih =>
+      rw [add_succ] at hd
+      rw [<- succ_add] at hd
+      rw [le_iff ]
+      use d
+  . intro h
+    rw [le_iff] at h
+    obtain ⟨d, hd_1⟩ := h
+    rw [hd_1]
+    rw [succ_add]
+    rw [<-add_succ]
+    -- nth_rw 1 [<-add_zero a]
+    constructor
+    have dsucc: 0≤ d++ := by use d++ ; simp
+    have h_add : 0 + a ≤ d++ + a := (Nat.add_le_add_right 0 (d++) a).mp dsucc
+    simp at h_add
+    simp; rw [add_comm]
+    assumption
+
+    by_contra h
+    nth_rw 1 [<-add_zero a] at h
+    apply add_left_cancel at h
+    contradiction
 
 -- /-- (f) a < b if and only if b = a + d for positive d. -/
 theorem Nat.lt_iff_add_pos (a b:Nat) : a < b ↔ ∃ d:Nat, d.IsPos ∧ b = a + d := by
@@ -439,8 +473,16 @@ theorem Nat.trichotomous (a b:Nat) : a < b ∨ a = b ∨ a > b := by
   . rw [lt_iff_succ_le] at case1
     rw [le_iff_lt_or_eq] at case1
     tauto
-  sorry
-/--
+  . right;right
+    rw [case2];
+    apply succ_gt_self
+  . right;right
+    have aa: a++ > a := by apply succ_gt_self
+    constructor
+    apply
+    rw?
+
+  /---
   (Not from textbook) Establish the decidability of this order computably.  The portion of the
   proof involving decidability has been provided; the remaining sorries involve claims about the
   natural numbers.  One could also have established this result by the `classical` tactic
