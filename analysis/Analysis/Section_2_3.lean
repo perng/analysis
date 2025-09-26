@@ -32,6 +32,7 @@ Users of the companion who have completed the exercises in this section are welc
 
 namespace Chapter2
 
+
 /-- Definition 2.3.1 (Multiplication of natural numbers) -/
 abbrev Nat.mul (n m : Nat) : Nat := Nat.recurse (fun _ prod ↦ prod + m) 0 n
 
@@ -148,7 +149,13 @@ theorem Nat.add_mul (a b c: Nat) : (a + b)*c = a*c + b*c := by
 /-- Proposition 2.3.5 (Multiplication is associative) / Exercise 2.3.3
 Compare with Mathlib's `Nat.mul_assoc` -/
 theorem Nat.mul_assoc (a b c: Nat) : (a * b) * c = a * (b * c) := by
-  sorry
+  induction a with
+  | zero =>
+    have h_zero_eq : zero = 0 := rfl
+    rw [h_zero_eq]
+    rw [zero_mul, zero_mul, zero_mul]
+  | succ a ih =>
+    rw [succ_mul, succ_mul, add_mul, ih]
 
 /-- (Not from textbook)  Nat is a commutative semiring.
     This allows tactics such as `ring` to apply to the Chapter 2 natural numbers. -/
@@ -210,9 +217,23 @@ lemma Nat.mul_cancel_right {a b c: Nat} (h: a * c = b * c) (hc: c.IsPos) : a = b
 /-- (Not from textbook) Nat is an ordered semiring.
 This allows tactics such as `gcongr` to apply to the Chapter 2 natural numbers. -/
 instance Nat.isOrderedRing : IsOrderedRing Nat where
-  zero_le_one := by sorry
-  mul_le_mul_of_nonneg_left := by sorry
-  mul_le_mul_of_nonneg_right := by sorry
+  zero_le_one := by
+    exact zero_le 1
+  mul_le_mul_of_nonneg_left := by
+    intro a b c hab hc
+    choose d d_pos using hab
+    rw [d_pos]
+    rw [mul_add]
+    rw [le_iff]
+    use (c*d)
+
+  mul_le_mul_of_nonneg_right := by
+    intro a b c hab hc
+    choose d d_pos using hab
+    rw [d_pos]
+    rw [add_mul]
+    rw [le_iff ]
+    use (d*c)
 
 /-- This illustration of the `gcongr` tactic is not from the
     textbook. -/
