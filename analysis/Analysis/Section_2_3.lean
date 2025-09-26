@@ -85,7 +85,13 @@ lemma Nat.mul_succ (n m:Nat) : n * m++ = n * m + n := by
 /-- Lemma 2.3.2 (Multiplication is commutative) / Exercise 2.3.1
 Compare with Mathlib's `Nat.mul_comm` -/
 lemma Nat.mul_comm (n m: Nat) : n * m = m * n := by
-  sorry
+  induction n with
+  | zero =>
+    have h_zero_eq : zero = 0 := rfl
+    rw [h_zero_eq,zero_mul, mul_zero]
+  | succ n ih =>
+    rw [succ_mul, ih]
+    rw [mul_succ]
 
 /-- Compare with Mathlib's `Nat.mul_one` -/
 theorem Nat.mul_one (m: Nat) : m * 1 = m := by
@@ -94,12 +100,34 @@ theorem Nat.mul_one (m: Nat) : m * 1 = m := by
 /-- This lemma will be useful to prove Lemma 2.3.3.
 Compare with Mathlib's `Nat.mul_pos` -/
 lemma Nat.pos_mul_pos {n m: Nat} (h₁: n.IsPos) (h₂: m.IsPos) : (n * m).IsPos := by
-  sorry
+  induction n with
+  | zero =>
+    have h_zero_eq : zero = 0 := rfl
+    rw [h_zero_eq, zero_mul]
+    contradiction
+  | succ n ih =>
+    rw [succ_mul, add_comm]
+    apply add_pos_left
+    assumption
 
 /-- Lemma 2.3.3 (Positive natural numbers have no zero divisors) / Exercise 2.3.2.
     Compare with Mathlib's `Nat.mul_eq_zero`.  -/
 lemma Nat.mul_eq_zero (n m: Nat) : n * m = 0 ↔ n = 0 ∨ m = 0 := by
-  sorry
+  constructor
+  . intro h
+    induction n with
+    | zero =>
+      have h_zero_eq : zero = 0 := rfl
+      rw [h_zero_eq]
+      left; rfl
+    | succ n ih =>
+      rw [succ_mul] at h
+      apply add_eq_zero at h
+      right; exact h.2
+  . intro h
+    obtain h_left | h_right := h
+    . rw [h_left, zero_mul]
+    . rw [h_right, mul_zero]
 
 /-- Proposition 2.3.4 (Distributive law)
 Compare with Mathlib's `Nat.mul_add` -/
