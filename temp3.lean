@@ -636,8 +636,7 @@ example (a b c d e:Nat) (hab: a ≤ b) (hbc: b < c) (hde: d < e) :
 theorem Nat.strong_induction {m₀:Nat} {P: Nat → Prop}
   (hind: ∀ m, m ≥ m₀ → (∀ m', m₀ ≤ m' ∧ m' < m → P m') → P m) :
     ∀ m, m ≥ m₀ → P m := by
-  sorry
-
+sorry
 
 /-- Exercise 2.2.6 (backwards induction)
     Compare with Mathlib's `Nat.decreasingInduction`. -/
@@ -650,51 +649,47 @@ sorry
     Compare with Mathlib's `Nat.le_induction`. -/
 theorem Nat.induction_from {n:Nat} {P: Nat → Prop} (hind: ∀ m, P m → P (m++)) :
     P n → ∀ m, m ≥ n → P m := by
-  sorry
-  -- intro hn m hm
-  -- -- We'll use strong induction on m
-  -- -- The key insight: if m ≥ n, then we can prove P m by induction
-  -- induction m with
-  -- | zero =>
-  --   -- Base case: m = 0
-  --   -- If 0 ≥ n, then n = 0 (since n ≥ 0 by zero_le)
-  --   have h_n_zero : n = 0 := by
-  --     rw [Nat.ge_iff_le] at hm
-  --     have h_n_ge_zero : n ≥ 0 := zero_le n
-  --     exact Nat.ge_antisymm h_n_ge_zero hm
-  --   rw [h_n_zero] at hn
-  --   exact hn
-  -- | succ k ih =>
-  --   -- Inductive case: m = k++
-  --   -- We need to prove P (k++)
-  --   by_cases h_ge : k ≥ n
-  --   . -- Case: k ≥ n
-  --     -- We have P k by inductive hypothesis
-  --     have h_k : P k := ih h_ge
-  --     -- Use the given hypothesis: P k → P (k++)
-  --     exact hind k h_k
-  --   . -- Case: k < n
-  --     -- Since k < n and k++ ≥ n, we must have k++ = n
-  --     have h_eq : k++ = n := by
-  --       rw [Nat.ge_iff_le] at hm
-  --       -- h_ge : ¬(k ≥ n), so k < n
-  --       -- hm : k++ ≥ n
-  --       -- Since k < n and k++ ≥ n, we must have k++ = n
-  --       have h_lt : k < n := by
-  --         -- k < n since ¬(k ≥ n)
-  --         rw [Nat.lt_iff]
-  --         sorry
-  --         constructor
-  --         . -- k ≤ n
-  --           -- We need to show k ≤ n, but we have ¬(k ≥ n)
-  --           -- Since ¬(k ≥ n) means k < n, and k < n implies k ≤ n
-  --           have nk: k < n := by
-
-  --           rw [Nat.gt_iff_lt] at h_ge
-  --           exact Nat.le_of_lt h_ge
-  --         . -- k ≠ n
-  --           intro h_eq
-  --           rw [h_eq] at h_ge
-  --           exact h_ge (Nat.ge_refl n)
-  --       -- Since k < n and k++ ≥ n, we must have k++ = n
-  --       exact Nat.le_antisymm hm (Nat.succ_le_iff.mpr h_lt)
+  intro hn m hm
+  -- We'll use strong induction on m
+  -- The key insight: if m ≥ n, then we can prove P m by induction
+  induction m with
+  | zero =>
+    -- Base case: m = 0
+    -- If 0 ≥ n, then n = 0 (since n ≥ 0 by zero_le)
+    have h_n_zero : n = 0 := by
+      rw [Nat.ge_iff_le] at hm
+      have h_n_ge_zero : n ≥ 0 := zero_le n
+      exact Nat.ge_antisymm h_n_ge_zero hm
+    rw [h_n_zero] at hn
+    exact hn
+  | succ k ih =>
+    -- Inductive case: m = k++
+    -- We need to prove P (k++)
+    by_cases h_ge : k ≥ n
+    . -- Case: k ≥ n
+      -- We have P k by inductive hypothesis
+      have h_k : P k := ih h_ge
+      -- Use the given hypothesis: P k → P (k++)
+      exact hind k h_k
+    . -- Case: k < n
+      -- Since k < n and k++ ≥ n, we must have k++ = n
+      have h_eq : k++ = n := by
+        rw [Nat.ge_iff_le] at hm
+        -- h_ge : ¬(k ≥ n), so k < n
+        -- hm : k++ ≥ n
+        -- Since k < n and k++ ≥ n, we must have k++ = n
+        have h_lt : k < n := by
+          -- k < n since ¬(k ≥ n)
+          rw [Nat.lt_iff]
+          constructor
+          . -- k ≤ n
+            -- We need to show k ≤ n, but we have ¬(k ≥ n)
+            -- Since ¬(k ≥ n) means k < n, and k < n implies k ≤ n
+            rw [Nat.gt_iff_lt] at h_ge
+            exact Nat.le_of_lt h_ge
+          . -- k ≠ n
+            intro h_eq
+            rw [h_eq] at h_ge
+            exact h_ge (Nat.ge_refl n)
+        -- Since k < n and k++ ≥ n, we must have k++ = n
+        exact Nat.le_antisymm hm (Nat.succ_le_iff.mpr h_lt)
