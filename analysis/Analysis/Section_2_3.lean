@@ -72,7 +72,15 @@ lemma Nat.mul_zero (n: Nat) : n * 0 = 0 := by
 /-- This lemma will be useful to prove Lemma 2.3.2.
 Compare with Mathlib's `Nat.mul_succ` -/
 lemma Nat.mul_succ (n m:Nat) : n * m++ = n * m + n := by
-  sorry
+  induction n with
+  | zero =>
+    have h_zero_eq : zero = 0 := rfl
+    rw [h_zero_eq, zero_mul, zero_mul]
+    simp
+  | succ n ih =>
+    rw [succ_mul, ih]
+    rw [succ_mul]
+    rw [add_succ, add_succ, add_assoc, add_comm n m, <- add_assoc]
 
 /-- Lemma 2.3.2 (Multiplication is commutative) / Exercise 2.3.1
 Compare with Mathlib's `Nat.mul_comm` -/
