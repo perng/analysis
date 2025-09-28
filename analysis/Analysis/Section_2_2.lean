@@ -638,7 +638,6 @@ theorem Nat.strong_induction {m₀:Nat} {P: Nat → Prop}
     ∀ m, m ≥ m₀ → P m := by
   sorry
 
-
 /-- Exercise 2.2.6 (backwards induction)
     Compare with Mathlib's `Nat.decreasingInduction`. -/
 theorem Nat.backwards_induction {n:Nat} {P: Nat → Prop}

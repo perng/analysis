@@ -242,11 +242,103 @@ example (a b c d:Nat) (hab: a ≤ b) : c*a*d ≤ c*b*d := by
   . exact d.zero_le
   exact c.zero_le
 
+
+/-- Helper lemma for Proposition 2.3.9 -/
+lemma Nat.le_iff_not_gt (a b: Nat) : a ≤ b ↔ ¬ a > b := by
+  constructor
+  . intro h
+    by_contra h'
+    -- We have a ≤ b and a > b, which is a contradiction
+    rw [Nat.gt_iff_lt] at h'
+    -- Since a ≤ b and a > b, we have both a ≤ b and a > b
+    rw [le_iff] at h
+    choose d hd using h
+    obtain ⟨hd1, hd2⟩ := h'
+    obtain ⟨hd3, hd4⟩ := hd1
+    rw [hd] at hd4
+    rw [add_assoc] at hd4
+    nth_rw 1 [<-add_zero a] at hd4
+
+    have h_eq : 0 = d + hd3 := by
+       apply Nat.add_left_cancel a
+       exact hd4
+    symm at h_eq
+    obtain ⟨h_d_zero, h_hd3_zero⟩ := Nat.add_eq_zero d hd3 h_eq
+     -- Now we have d = 0, which contradicts our earlier assumption
+    rw [h_d_zero, add_zero] at hd
+    contradiction
+  . intro h
+    -- We need to show a ≤ b given ¬(a > b)
+    -- By trichotomy, we have a < b ∨ a = b ∨ a > b
+    have h_tri : a < b ∨ a = b ∨ a > b := trichotomous a b
+    obtain h_lt | h_eq | h_gt := h_tri
+    . -- Case: a < b
+      exact Nat.le_of_lt h_lt
+    . -- Case: a = b
+      rw [h_eq]
+    . -- Case: a > b
+      -- This contradicts our hypothesis ¬(a > b)
+      contradiction
+
+lemma Nat.gt_iff_not_le (a b: Nat) : a > b ↔ ¬ a ≤ b := by
+  constructor
+  . intro h
+    by_contra h'
+    rw [le_iff_not_gt] at h'
+    contradiction
+  . intro h
+    by_contra h'
+    rw [le_iff_not_gt] at h
+    contradiction
+
 /-- Proposition 2.3.9 (Euclid's division lemma) / Exercise 2.3.5
 Compare with Mathlib's `Nat.mod_eq_iff` -/
+
+
 theorem Nat.exists_div_mod (n:Nat) {q: Nat} (hq: q.IsPos) :
     ∃ m r: Nat, 0 ≤ r ∧ r < q ∧ n = m * q + r := by
-  sorry
+  revert n; apply induction
+  . use 0, 0
+    split_ands
+    . exact zero_le 0
+    . use q; simp
+    . unfold Nat.IsPos at hq
+      intro hz
+      symm at hz
+      contradiction
+    . rw [zero_mul, add_zero]
+  . intro n
+    intro ht
+    choose m r h0 hlt using ht
+    obtain ⟨rq, nm⟩ := hlt
+    have haa: r++<q ∨ r++=q  ∨ r++>q := trichotomous (r++) q
+    obtain ha1 | ha2 | ha3 := haa
+    . use m, (r++)
+      split_ands
+      . exact zero_le (r++)
+      . exact ha1.1
+      . exact ha1.2
+      . rw [nm]
+        rw [<-add_succ]
+    . use m++, 0
+      split_ands
+      . exact zero_le 0
+      . apply zero_le
+      . unfold Nat.IsPos at hq
+        intro hz
+        symm at hz
+        contradiction
+      . rw [nm]
+        rw [<-add_succ]
+        rw [ha2]
+        simp
+        rw [succ_mul]
+    . rw [gt_iff_lt] at ha3
+      rw [Nat.lt_iff_succ_le] at rq
+      rw [le_iff_not_gt] at rq
+      contradiction
+
+
 
 /-- Definition 2.3.11 (Exponentiation for natural numbers) -/
 abbrev Nat.pow (m n: Nat) : Nat := Nat.recurse (fun _ prod ↦ prod * m) 1 n
