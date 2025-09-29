@@ -314,7 +314,19 @@ theorem SetTheory.Set.pair_comm (a b:Object) : ({a,b}:Set) = {b,a} := by
 /-- Remark 3.1.9 -/
 @[simp]
 theorem SetTheory.Set.pair_self (a:Object) : ({a,a}:Set) = {a} := by
-  sorry
+  rw [pair_eq]
+  apply ext
+  intro x
+  constructor
+  . intro hx
+    rw [mem_union] at *
+    obtain case1 | case2 := hx
+    . simp [case1]
+    . simp [case2]
+  . intro hx
+    rw [mem_union] at *
+    left
+    assumption
 
 /-- Exercise 3.1.1 -/
 theorem SetTheory.Set.pair_eq_pair {a b c d:Object} (h: ({a,b}:Set) = {c,d}) :
