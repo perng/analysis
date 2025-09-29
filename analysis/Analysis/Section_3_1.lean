@@ -446,7 +446,8 @@ theorem SetTheory.Set.union_assoc (A B C:Set) : (A ∪ B) ∪ C = A ∪ (B ∪ C
 /-- Proposition 3.1.27(c) -/
 @[simp]
 theorem SetTheory.Set.union_self (A:Set) : A ∪ A = A := by
-  sorry
+  ext
+  simp
 
 /-- Proposition 3.1.27(a) -/
 @[simp]
