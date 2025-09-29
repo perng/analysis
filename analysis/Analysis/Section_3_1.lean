@@ -413,7 +413,17 @@ theorem SetTheory.Set.emptyset_neq_pair : empty ≠ pair_empty := by
 
 /-- Exercise 3.1.2 -/
 theorem SetTheory.Set.singleton_empty_neq_pair : singleton_empty ≠ pair_empty := by
-  sorry
+  classical
+  intro h
+  have hx : (singleton_empty : Object) ∈ pair_empty := by
+    simp [pair_empty]
+  have hx' : (singleton_empty : Object) ∈ singleton_empty := by
+    rw [<-h] at hx
+    assumption
+  simp at hx'
+  have hx'': singleton_empty ≠  empty := by
+    exact emptyset_neq_singleton.symm
+  contradiction
 
 /--
   Remark 3.1.11.
