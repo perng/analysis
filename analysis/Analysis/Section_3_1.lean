@@ -329,9 +329,61 @@ theorem SetTheory.Set.pair_self (a:Object) : ({a,a}:Set) = {a} := by
     assumption
 
 /-- Exercise 3.1.1 -/
-theorem SetTheory.Set.pair_eq_pair {a b c d:Object} (h: ({a,b}:Set) = {c,d}) :
-    a = c ∧ b = d ∨ a = d ∧ b = c := by
-  sorry
+theorem SetTheory.Set.pair_eq_pair {a b c d:Object} (h: ({a,b}:Set) = {c,d}) : a = c ∧ b = d ∨ a = d ∧ b = c := by
+  classical
+  have h_a : a ∈ ({a,b}:Set) := by
+    simp
+  have h_b : b ∈ ({a,b}:Set) := by
+    simp
+  have h_a_in_cd : a ∈ ({c,d}:Set) := by
+    simpa [h] using h_a
+  have h_b_in_cd : b ∈ ({c,d}:Set) := by
+    simpa [h] using h_b
+  have h_a_eq : a = c ∨ a = d := by
+    simpa [mem_pair] using h_a_in_cd
+  have h_b_eq : b = c ∨ b = d := by
+    simpa [mem_pair] using h_b_in_cd
+  have h_c_in_ab : c ∈ ({a,b}:Set) := by
+    have : c ∈ ({c,d}:Set) := by
+      simp
+    rw [h]
+    assumption
+  have h_d_in_ab : d ∈ ({a,b}:Set) := by
+    have : d ∈ ({c,d}:Set) := by
+      simp
+    rw [h]
+    assumption
+  have h_c_eq : c = a ∨ c = b := by
+    simpa [mem_pair] using h_c_in_ab
+  have h_d_eq : d = a ∨ d = b := by
+    simpa [mem_pair] using h_d_in_ab
+  cases h_a_eq with
+  | inl h_a_eq_c =>
+      cases h_b_eq with
+      | inl h_b_eq_c =>
+          cases h_d_eq with
+          | inl h_d_eq_a =>
+              right
+              exact ⟨h_d_eq_a.symm, h_b_eq_c⟩
+          | inr h_d_eq_b =>
+              left
+              exact ⟨h_a_eq_c, h_d_eq_b.symm⟩
+      | inr h_b_eq_d =>
+          left
+          exact ⟨h_a_eq_c, h_b_eq_d⟩
+  | inr h_a_eq_d =>
+      cases h_b_eq with
+      | inl h_b_eq_c =>
+          right
+          exact ⟨h_a_eq_d, h_b_eq_c⟩
+      | inr h_b_eq_d =>
+          cases h_c_eq with
+          | inl h_c_eq_a =>
+              left
+              exact ⟨h_c_eq_a.symm, h_b_eq_d⟩
+          | inr h_c_eq_b =>
+              right
+              exact ⟨h_a_eq_d, h_c_eq_b.symm⟩
 
 abbrev SetTheory.Set.empty : Set := ∅
 abbrev SetTheory.Set.singleton_empty : Set := {(empty: Object)}
