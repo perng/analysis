@@ -401,7 +401,15 @@ have hx' : (empty : Object) ∈ empty := by
 exact SetTheory.Set.not_mem_empty (empty : Object) hx'
 
 /-- Exercise 3.1.2 -/
-theorem SetTheory.Set.emptyset_neq_pair : empty ≠ pair_empty := by sorry
+theorem SetTheory.Set.emptyset_neq_pair : empty ≠ pair_empty := by
+  classical
+  intro h
+  have hx : (empty : Object) ∈ pair_empty := by
+    simp [pair_empty]
+  have hx' : (empty : Object) ∈ empty := by
+    rw [<-h] at hx
+    assumption
+  exact SetTheory.Set.not_mem_empty (empty : Object) hx'
 
 /-- Exercise 3.1.2 -/
 theorem SetTheory.Set.singleton_empty_neq_pair : singleton_empty ≠ pair_empty := by
