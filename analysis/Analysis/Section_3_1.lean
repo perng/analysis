@@ -422,26 +422,21 @@ theorem SetTheory.Set.union_congr_right (A B B':Set) (h: B = B') : A ∪ B = A �
 /-- Lemma 3.1.12 (Basic properties of unions) / Exercise 3.1.3 -/
 theorem SetTheory.Set.singleton_union_singleton (a b:Object) :
     ({a}:Set) ∪ ({b}:Set) = {a,b} := by
-  sorry
+  ext
+  simp
 
 /-- Lemma 3.1.12 (Basic properties of unions) / Exercise 3.1.3 -/
-theorem SetTheory.Set.union_comm (A B:Set) : A ∪ B = B ∪ A := by sorry
+theorem SetTheory.Set.union_comm (A B:Set) : A ∪ B = B ∪ A := by
+  ext
+  simp
+  rw [or_comm]
 
 /-- Lemma 3.1.12 (Basic properties of unions) / Exercise 3.1.3 -/
 theorem SetTheory.Set.union_assoc (A B C:Set) : (A ∪ B) ∪ C = A ∪ (B ∪ C) := by
   -- this proof is written to follow the structure of the original text.
   ext x
-  constructor
-  . intro hx; rw [mem_union] at hx
-    obtain case1 | case2 := hx
-    . rw [mem_union] at case1
-      obtain case1a | case1b := case1
-      . rw [mem_union]; tauto
-      have : x ∈ B ∪ C := by rw [mem_union]; tauto
-      rw [mem_union]; tauto
-    have : x ∈ B ∪ C := by rw [mem_union]; tauto
-    rw [mem_union]; tauto
-  sorry
+  simp
+  rw [or_assoc]
 
 /-- Proposition 3.1.27(c) -/
 @[simp]
@@ -452,12 +447,15 @@ theorem SetTheory.Set.union_self (A:Set) : A ∪ A = A := by
 /-- Proposition 3.1.27(a) -/
 @[simp]
 theorem SetTheory.Set.union_empty (A:Set) : A ∪ ∅ = A := by
-  sorry
+  ext
+  simp
+
 
 /-- Proposition 3.1.27(a) -/
 @[simp]
 theorem SetTheory.Set.empty_union (A:Set) : ∅ ∪ A = A := by
-  sorry
+  ext
+  simp
 
 theorem SetTheory.Set.triple_eq (a b c:Object) : {a,b,c} = ({a}:Set) ∪ {b,c} := by
   rfl
