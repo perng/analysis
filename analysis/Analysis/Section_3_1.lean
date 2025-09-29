@@ -272,10 +272,44 @@ theorem SetTheory.Set.singleton_uniq (a:Object) : ∃! (X:Set), ∀ x, x ∈ X �
       assumption
 
 /-- Remark 3.1.9 -/
-theorem SetTheory.Set.pair_uniq (a b:Object) : ∃! (X:Set), ∀ x, x ∈ X ↔ x = a ∨ x = b := by sorry
+theorem SetTheory.Set.pair_uniq (a b:Object) : ∃! (X:Set), ∀ x, x ∈ X ↔ x = a ∨ x = b := by
+  use {a,b}
+  constructor
+  . intro x
+    simp
+  . intro Y hY
+    apply ext
+    intro x
+    constructor
+    . intro hx
+      rw [hY] at hx
+      obtain case1 | case2 := hx
+      . simp [case1]
+      . simp [case2]
+    . intro hx
+      simp at hx
+      simp [hY]
+      assumption
+
 
 /-- Remark 3.1.9 -/
-theorem SetTheory.Set.pair_comm (a b:Object) : ({a,b}:Set) = {b,a} := by sorry
+theorem SetTheory.Set.pair_comm (a b:Object) : ({a,b}:Set) = {b,a} := by
+
+  rw [pair_eq, pair_eq]
+  apply ext
+  intro x
+  constructor
+  . intro hx
+    rw [mem_union] at *
+    obtain case1 | case2 := hx
+    . simp [case1]
+    . simp [case2]
+  . intro hx
+    rw [mem_union] at *
+    obtain case1 | case2 := hx
+    . simp [case1]
+    . simp [case2]
+
 
 /-- Remark 3.1.9 -/
 @[simp]
