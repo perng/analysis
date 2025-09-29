@@ -178,7 +178,19 @@ theorem SetTheory.Set.eq_empty_iff_forall_notMem {X:Set} : X = ∅ ↔ (∀ x, x
 
 /-- Empty set is unique -/
 theorem SetTheory.Set.empty_unique : ∃! (X:Set), ∀ x, x ∉ X := by
-  sorry
+  use ∅
+  constructor
+  . intro x hx
+    simp [not_mem_empty] at hx
+  . intro Y hY
+    apply ext
+    intro x
+    constructor
+    . intro hx
+      apply hY x at hx
+      contradiction
+    . intro hx
+      simp [not_mem_empty] at hx
 
 /-- Lemma 3.1.5 (Single choice) -/
 lemma SetTheory.Set.nonempty_def {X:Set} (h: X ≠ ∅) : ∃ x, x ∈ X := by
