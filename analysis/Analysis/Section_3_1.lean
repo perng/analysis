@@ -640,17 +640,17 @@ theorem SetTheory.Set.specify_subset {A:Set} (P: A → Prop) : A.specify P ⊆ A
 theorem SetTheory.Set.specify_congr {A A':Set} (hAA':A = A') {P: A → Prop} {P': A' → Prop}
   (hPP': (x:Object) → (h:x ∈ A) → (h':x ∈ A') → P ⟨ x, h⟩ ↔ P' ⟨ x, h'⟩ ) :
     A.specify P = A'.specify P' := by
-  apply ext
-  intro x
+  ext x
+  simp only [specification_axiom'']
   constructor
-  · intro hx
-    obtain hx1 := (SetTheory.specification_axiom A P ).1 x
-    obtain hx2 := (SetTheory.specification_axiom A' P').1 x
-    sorry
-
-  · intro hx
-    sorry
-
+  · rintro ⟨xa, pxa⟩
+    have xa' : x ∈ A' := by rwa [hAA'] at xa
+    specialize hPP' x xa xa'
+    use xa', hPP'.mp pxa
+  rintro ⟨xa', pxa'⟩
+  have xa : x ∈ A := by rwa [← hAA'] at xa'
+  specialize hPP' x xa xa'
+  use xa, hPP'.mpr pxa'
 
 instance SetTheory.Set.instIntersection : Inter Set where
   inter X Y := X.specify (fun x ↦ x.val ∈ Y)
@@ -933,7 +933,7 @@ example : ({3, 5}:Set) ⊆ {1, 3, 5} := by
 
 /-- Example 3.1.17 (simplified). -/
 example : ({3, 5}:Set).specify (fun x ↦ x.val ≠ 3) = ({5}:Set) := by
-  ext
+  ext x
   simp only [mem_singleton, specification_axiom'']
   constructor
   · rintro ⟨h1, h2⟩; simp only [mem_pair] at h1; tauto
@@ -959,7 +959,10 @@ example : ¬ Disjoint ({1, 2, 3}:Set) {2,3,4} := by
   rw [eq_empty_iff_forall_notMem] at h
   aesop
 
-example : Disjoint (∅:Set) ∅ := by sorry
+example : Disjoint (∅:Set) ∅ := by
+  rw [disjoint_iff]
+  aesop
+
 
 /-- Definition 3.1.26 example -/
 
@@ -968,27 +971,83 @@ example : ({1, 2, 3, 4}:Set) \ {2,4,6} = {1, 3} := by
 
 /-- Example 3.1.30 -/
 example : ({3,5,9}:Set).replace (P := fun x y ↦ ∃ (n:ℕ), x.val = n ∧ y = (n+1:ℕ)) (by aesop)
-  = {4,6,10} := by sorry
+  = {4,6,10} := by
+  ext
+  simp only [replacement_axiom]
+  constructor
+  · rintro ⟨a, ⟨x, ⟨hax, hxs⟩⟩⟩
+    aesop
+  aesop
+
 
 /-- Example 3.1.31 -/
 example : ({3,5,9}:Set).replace (P := fun _ y ↦ y=1) (by aesop) = {1} := by
   ext; simp only [replacement_axiom]; aesop
 
 /-- Exercise 3.1.5.  One can use the `tfae_have` and `tfae_finish` tactics here. -/
-theorem SetTheory.Set.subset_tfae (A B:Set) : [A ⊆ B, A ∪ B = B, A ∩ B = A].TFAE := by sorry
+theorem SetTheory.Set.subset_tfae (A B:Set) : [A ⊆ B, A ∪ B = B, A ∩ B = A].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h
+    ext x
+    simp [mem_union]
+    tauto
+  tfae_have 2 → 3 := by
+    intro h
+    ext x
+    simp only [mem_inter]
+    constructor
+    · intro ⟨h1, h2⟩
+      exact h1
+    · intro h1
+      constructor
+      · exact h1
+      · rw [← h]
+        simp [mem_union]
+        left
+        exact h1
+  tfae_have 3 → 1 := by
+    intro h
+    intro x hx
+    rw [← h] at hx
+    simp [mem_inter] at hx
+    exact hx.2
+  tfae_finish
+
 
 /-- Exercise 3.1.7 -/
 theorem SetTheory.Set.inter_subset_left (A B:Set) : A ∩ B ⊆ A := by
-  sorry
+  intro x hx
+  simp [mem_inter] at hx
+  exact hx.1
 
 /-- Exercise 3.1.7 -/
 theorem SetTheory.Set.inter_subset_right (A B:Set) : A ∩ B ⊆ B := by
-  sorry
+  intro x hx
+  simp [mem_inter] at hx
+  exact hx.2
 
 /-- Exercise 3.1.7 -/
 @[simp]
 theorem SetTheory.Set.subset_inter_iff (A B C:Set) : C ⊆ A ∩ B ↔ C ⊆ A ∧ C ⊆ B := by
-  sorry
+  constructor
+  · intro h
+    constructor
+    · intro x hx
+      have hxAB : x ∈ A ∧ x ∈ B := by
+        have hx_inter : x ∈ A ∩ B := h x hx
+        simpa [mem_inter] using hx_inter
+      exact hxAB.1
+    · intro x hx
+      have hxAB : x ∈ A ∧ x ∈ B := by
+        have hx_inter : x ∈ A ∩ B := h x hx
+        simpa [mem_inter] using hx_inter
+      exact hxAB.2
+  · rintro ⟨hCA, hCB⟩
+    intro x hx
+    have ha : x ∈ A := hCA x hx
+    have hb : x ∈ B := hCB x hx
+    have hxAB : x ∈ A ∧ x ∈ B := And.intro ha hb
+    simpa [mem_inter] using hxAB
 
 /-- Exercise 3.1.7 -/
 theorem SetTheory.Set.subset_union_left (A B:Set) : A ⊆ A ∪ B := by
