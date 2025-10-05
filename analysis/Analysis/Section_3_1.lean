@@ -1051,29 +1051,84 @@ theorem SetTheory.Set.subset_inter_iff (A B C:Set) : C ⊆ A ∩ B ↔ C ⊆ A �
 
 /-- Exercise 3.1.7 -/
 theorem SetTheory.Set.subset_union_left (A B:Set) : A ⊆ A ∪ B := by
-  sorry
+  intro x hx
+  simp [mem_union]
+  left
+  exact hx
 
 /-- Exercise 3.1.7 -/
 theorem SetTheory.Set.subset_union_right (A B:Set) : B ⊆ A ∪ B := by
-  sorry
+  intro x hx
+  simp [mem_union]
+  right
+  exact hx
 
 /-- Exercise 3.1.7 -/
 @[simp]
 theorem SetTheory.Set.union_subset_iff (A B C:Set) : A ∪ B ⊆ C ↔ A ⊆ C ∧ B ⊆ C := by
-  sorry
+  constructor
+  · intro h
+    constructor
+    rw [subset_def] at *
+    simp [mem_union] at *
+    intro x hx
+    apply h
+    left
+    exact hx
+    rw [subset_def] at *
+    simp [mem_union] at *
+    intro x hx
+    apply h
+    right
+    exact hx
+
+  . rintro ⟨hAC, hBC⟩
+    rw [subset_def] at *
+    simp [mem_union] at *
+    intro x hx
+    obtain hxAB | hxBC := hx
+    apply hAC; exact hxAB
+    apply hBC; exact hxBC
 
 /-- Exercise 3.1.8 -/
 @[simp]
-theorem SetTheory.Set.inter_union_cancel (A B:Set) : A ∩ (A ∪ B) = A := by sorry
+theorem SetTheory.Set.inter_union_cancel (A B:Set) : A ∩ (A ∪ B) = A := by
+  ext x
+  simp [mem_inter, mem_union]
+  tauto
+
 
 /-- Exercise 3.1.8 -/
 @[simp]
-theorem SetTheory.Set.union_inter_cancel (A B:Set) : A ∪ (A ∩ B) = A := by sorry
+theorem SetTheory.Set.union_inter_cancel (A B:Set) : A ∪ (A ∩ B) = A := by
+  ext x
+  simp [mem_union, mem_inter]
+  tauto
+
 
 /-- Exercise 3.1.9 -/
 theorem SetTheory.Set.partition_left {A B X:Set} (h_union: A ∪ B = X) (h_inter: A ∩ B = ∅) :
-    A = X \ B := by sorry
-
+    A = X \ B := by
+  ext x
+  constructor
+  · intro hx
+    simp [mem_sdiff]
+    constructor
+    · have hx_union : x ∈ A ∪ B := by
+        simp [mem_union, hx]
+      simpa [h_union] using hx_union
+    · intro hBx
+      have hxAB : x ∈ A ∧ x ∈ B := And.intro hx hBx
+      have hx_inter' : x ∈ A ∩ B := by simpa [mem_inter] using hxAB
+      have : x ∈ (∅ : Set) := by simpa [h_inter] using hx_inter'
+      simp at this
+  · intro hx
+    have hxX_notB : x ∈ X ∧ x ∉ B := by simpa [mem_sdiff] using hx
+    have hx_union : x ∈ A ∪ B := by simpa [h_union] using hxX_notB.1
+    have hxAorB : x ∈ A ∨ x ∈ B := by simpa [mem_union] using hx_union
+    obtain hxA | hxB := hxAorB
+    · exact hxA
+    · exact (hxX_notB.2 hxB).elim
 /-- Exercise 3.1.9 -/
 theorem SetTheory.Set.partition_right {A B X:Set} (h_union: A ∪ B = X) (h_inter: A ∩ B = ∅) :
     B = X \ A := by
