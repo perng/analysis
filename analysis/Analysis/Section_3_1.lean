@@ -1109,37 +1109,102 @@ theorem SetTheory.Set.union_inter_cancel (A B:Set) : A ∪ (A ∩ B) = A := by
 /-- Exercise 3.1.9 -/
 theorem SetTheory.Set.partition_left {A B X:Set} (h_union: A ∪ B = X) (h_inter: A ∩ B = ∅) :
     A = X \ B := by
+  apply ext; intro x;
+  simp
+  constructor
+  · intro hA
+    constructor
+    · rw [← h_union]
+      rw [mem_union]
+      apply Or.inl hA
+    · intro hB
+      have hAB: x ∈ A ∩ B := by
+        simp; constructor; exact hA; exact hB
+      rw [h_inter] at hAB
+      apply SetTheory.Set.not_mem_empty x
+      assumption
+
+  · intro ⟨ hX, hB' ⟩
+    rw [← h_union] at hX
+    rw [mem_union] at hX
+    rcases hX with hA | hB
+    · exact hA
+    · contradiction
+/-- Exercise 3.1.9 -/
+theorem SetTheory.Set.partition_right {A B X:Set} (h_union: A ∪ B = X) (h_inter: A ∩ B = ∅) :
+    B = X \ A := by
   ext x
+  simp [mem_sdiff]
   constructor
   · intro hx
-    simp [mem_sdiff]
     constructor
     · have hx_union : x ∈ A ∪ B := by
         simp [mem_union, hx]
       simpa [h_union] using hx_union
-    · intro hBx
-      have hxAB : x ∈ A ∧ x ∈ B := And.intro hx hBx
-      have hx_inter' : x ∈ A ∩ B := by simpa [mem_inter] using hxAB
-      have : x ∈ (∅ : Set) := by simpa [h_inter] using hx_inter'
-      simp at this
+    · intro hxA
+      have hxAB : x ∈ A ∧ x ∈ B := And.intro hxA hx
+      have hx_inter: x ∈ A ∩ B := by simpa [mem_inter] using hxAB
+      rw [h_inter] at hx_inter
+      apply SetTheory.Set.not_mem_empty x
+      assumption
   · intro hx
-    have hxX_notB : x ∈ X ∧ x ∉ B := by simpa [mem_sdiff] using hx
-    have hx_union : x ∈ A ∪ B := by simpa [h_union] using hxX_notB.1
-    have hxAorB : x ∈ A ∨ x ∈ B := by simpa [mem_union] using hx_union
-    obtain hxA | hxB := hxAorB
-    · exact hxA
-    · exact (hxX_notB.2 hxB).elim
-/-- Exercise 3.1.9 -/
-theorem SetTheory.Set.partition_right {A B X:Set} (h_union: A ∪ B = X) (h_inter: A ∩ B = ∅) :
-    B = X \ A := by
-  sorry
+    obtain ⟨hx_X, hx_A⟩ := hx
+    by_contra hx_B
+    rw [<-h_union] at hx_X
+    rw [mem_union] at hx_X
+    obtain hx_A | hx_B := hx_X
+    . contradiction
+    . contradiction
+
 
 /--
   Exercise 3.1.10.
   You may find `Function.onFun_apply` and the `fin_cases` tactic useful.
 -/
 theorem SetTheory.Set.pairwise_disjoint (A B:Set) :
-    Pairwise (Function.onFun Disjoint ![A \ B, A ∩ B, B \ A]) := by sorry
+    Pairwise (Function.onFun Disjoint ![A \ B, A ∩ B, B \ A]) := by
+
+  intro i j h_ne
+  -- Function.onFun applies Disjoint to the values at indices i and j
+  simp only [Function.onFun]
+  fin_cases i <;> fin_cases j <;> simp at h_ne ⊢
+  . rw [disjoint_iff]
+    apply ext
+    intro x
+    simp [mem_inter, mem_sdiff]
+    intro h_sdiff h_inter
+    intro
+    exact h_inter
+  . rw [disjoint_iff]
+    apply ext
+    intro x
+    simp [mem_inter, mem_sdiff]
+    intro h_sdiff h_inter h_memB
+    assumption
+  . rw [disjoint_iff]
+    apply ext
+    intro x
+    simp [mem_inter, mem_sdiff]
+    intro h_sdiff h_inter h_memB
+    assumption
+  . rw [disjoint_iff]
+    apply ext
+    intro x
+    simp [mem_inter, mem_sdiff]
+    intro h_sdiff h_inter
+    assumption
+  . rw [disjoint_iff]
+    apply ext
+    intro x
+    simp [mem_inter, mem_sdiff]
+    intro h_sdiff h_inter h_memA
+    assumption
+  . rw [disjoint_iff]
+    apply ext
+    intro x
+    simp [mem_inter, mem_sdiff]
+    intro h_sdiff h_inter h_memB
+    contradiction
 
 /-- Exercise 3.1.10 -/
 theorem SetTheory.Set.union_eq_partition (A B:Set) : A ∪ B = (A \ B) ∪ (A ∩ B) ∪ (B \ A) := by
