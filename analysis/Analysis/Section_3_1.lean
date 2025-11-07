@@ -1208,7 +1208,10 @@ theorem SetTheory.Set.pairwise_disjoint (A B:Set) :
 
 /-- Exercise 3.1.10 -/
 theorem SetTheory.Set.union_eq_partition (A B:Set) : A ∪ B = (A \ B) ∪ (A ∩ B) ∪ (B \ A) := by
-  sorry
+  apply ext; intro x
+  simp [mem_union, mem_sdiff, mem_inter]
+  tauto
+
 
 /--
   Exercise 3.1.11.
@@ -1216,20 +1219,66 @@ theorem SetTheory.Set.union_eq_partition (A B:Set) : A ∪ B = (A \ B) ∪ (A �
   `Set.specification_axiom'`, or anything built from them (like differences and intersections).
 -/
 theorem SetTheory.Set.specification_from_replacement {A:Set} {P: A → Prop} :
-    ∃ B, B ⊆ A ∧ ∀ x, x.val ∈ B ↔ P x := by sorry
+    ∃ B, B ⊆ A ∧ ∀ x, x.val ∈ B ↔ P x := by
+  let Q x y := P x ∧ x.val = y
+  have hQ : ∀ (x : A.toSubtype) (y y' : Object), Q x y ∧ Q x y' → y = y' := by
+    intro x y y' ⟨hQ1, hQ2⟩
+    have hQ1' : P x := hQ1.1
+    have hQ2' : x.val = y := hQ1.2
+    have hQ3 : x.val = y' := hQ2.2
+    rw [hQ2'] at hQ3
+    exact hQ3
+  use (A.replace hQ)
+  constructor
+  · intro x hx
+    obtain ⟨x', ⟨_, rfl⟩⟩ := (replacement_axiom _ _).mp hx
+    exact x'.property
+  intro x
+  rw [replacement_axiom]
+  constructor
+  · rintro ⟨x', _, hx'⟩
+    rw [coe_inj] at hx'
+    rwa [←hx']
+  intro hx
+  use x
 
 /-- Exercise 3.1.12.-/
 theorem SetTheory.Set.subset_union_subset {A B A' B':Set} (hA'A: A' ⊆ A) (hB'B: B' ⊆ B) :
-    A' ∪ B' ⊆ A ∪ B := by sorry
+    A' ∪ B' ⊆ A ∪ B := by
+    simp
+    constructor
+    have hA' : A ⊆ A ∪ B := by
+      rw [SetTheory.Set.subset_def]
+      intro x hx
+      rw [SetTheory.Set.mem_union]
+      left; exact hx
+    apply subset_trans hA'A hA'
+
+    have hB' : B ⊆ A ∪ B := by
+      rw [SetTheory.Set.subset_def]
+      intro x hx
+      rw [SetTheory.Set.mem_union]
+      right; exact hx
+    apply subset_trans hB'B hB'
 
 /-- Exercise 3.1.12.-/
 theorem SetTheory.Set.subset_inter_subset {A B A' B':Set} (hA'A: A' ⊆ A) (hB'B: B' ⊆ B) :
-    A' ∩ B' ⊆ A ∩ B := by sorry
+    A' ∩ B' ⊆ A ∩ B := by
+    simp
+    constructor
+    simp [subset_def] at *
+    intro x xA' xB'
+    apply hA'A
+    exact xA'
+
+    simp [subset_def] at *
+    intro x xA' xB'
+    apply hB'B
+    exact xB'
 
 /-- Exercise 3.1.12.-/
 theorem SetTheory.Set.subset_diff_subset_counter :
     ∃ (A B A' B':Set), (A' ⊆ A) ∧ (B' ⊆ B) ∧ ¬ (A' \ B') ⊆ (A \ B) := by sorry
-
 /-
   Final part of Exercise 3.1.12: state and prove a reasonable substitute positive result for the
   above theorem that involves set differences.
