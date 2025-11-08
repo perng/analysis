@@ -1276,9 +1276,51 @@ theorem SetTheory.Set.subset_inter_subset {A B A' B':Set} (hA'A: A' ⊆ A) (hB'B
     apply hB'B
     exact xB'
 
-/-- Exercise 3.1.12.-/
+/-- Exercise 3.1.12.  my solution -/
 theorem SetTheory.Set.subset_diff_subset_counter :
-    ∃ (A B A' B':Set), (A' ⊆ A) ∧ (B' ⊆ B) ∧ ¬ (A' \ B') ⊆ (A \ B) := by sorry
+    ∃ (A B A' B':Set), (A' ⊆ A) ∧ (B' ⊆ B) ∧ ¬ (A' \ B') ⊆ (A \ B) := by
+    use {1,2,3,4}, {1,2,5}, {1,2,3}, {2}
+    constructor
+    simp [subset_def]
+    constructor
+    simp [subset_def]
+    intro hx
+    have h₁ : (1 : Object) ∈ (({1, 2, 3} : Set) \ {2}) := by
+      simp [mem_sdiff, mem_singleton]
+    have h₂ :=
+      (SetTheory.Set.mem_sdiff (1 : Object) ({1, 2, 3, 4} : Set) ({1, 2, 5} : Set)).1
+        (hx (1 : Object) h₁)
+    have hB : (1 : Object) ∈ ({1, 2, 5} : Set) := by
+      simp
+    exact h₂.2 hB
+
+/-- Exercise 3.1.12.  solution from github-/
+theorem SetTheory.Set.subset_diff_subset_counter2 :
+    ∃ (A B A' B':Set), (A' ⊆ A) ∧ (B' ⊆ B) ∧ ¬ (A' \ B') ⊆ (A \ B) := by
+  suffices h: ∃ (A B A' B':Set), (A' ⊆ A) ∧ (B' ⊆ B) ∧ ∃ x, x ∈ (A' \ B') ∧ x ∉ (A \ B)
+  · have ⟨A, B, A', B', ha, hb, ⟨x, hx⟩⟩ := h
+    use A, B, A', B', ha, hb
+    rw [subset_def]
+    push_neg
+    use x, hx.1, hx.2
+  simp only [subset_def]
+  set x : Object := (emptyset: Object)
+  use {x}, {x}, {x}, emptyset
+  constructor
+  · aesop
+  constructor
+  · apply empty_subset
+  use x
+  constructor
+  · rw [mem_sdiff]
+    constructor
+    · rw [mem_singleton]
+    apply not_mem_empty
+  rw [mem_sdiff]
+  push_neg
+  intro h
+  exact h
+
 /-
   Final part of Exercise 3.1.12: state and prove a reasonable substitute positive result for the
   above theorem that involves set differences.
